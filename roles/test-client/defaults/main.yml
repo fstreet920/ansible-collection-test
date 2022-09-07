@@ -1,0 +1,15 @@
+---
+# Dottrace temp dir
+dottraceTempDir: C:\temp
+# Dottrace snapshots dir
+dottraceSnapshotsDir: C:\snapshots
+# Dottrace command line tools dir
+dottraceCmdLineDir: C:\dottrace-cmdline
+# Dottrace Sampling scripts dir
+dottraceSamplingScriptsDir: C:\dottrace-sampling
+dottraceSamplingScriptsSrcDir: /mnt/c/dottrace-sampling/
+# S3 bucket
+s3BucketForSamples: faintest-dev-dot-trace-snapshots-001
+# Sample duration in seconds
+sampleDurationSec: 10
+

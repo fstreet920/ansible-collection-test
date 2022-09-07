@@ -1,0 +1,53 @@
+---
+# - name: Copy dottrace zip file to temp directory
+#  win_copy:
+#    src:  /mnt/c/dottrace-cmdline/JetBrains.dotTrace.CommandLineTools.windows-x64.2022.1.1.zip
+#    dest: C:\temp\
+- name: Create temp directory
+  win_file:
+    path: '{{dottraceTempDir}}'
+    state: directory 
+- name: Download dottrace command line tools zip
+  win_get_url:
+    url: https://download.jetbrains.com/resharper/dotUltimate.2022.1.1/JetBrains.dotTrace.CommandLineTools.windows-x64.2022.1.1.zip?_ga=2.172186528.2071528660.1654108531-1777007726.1651261407&_gac=1.160498383.1654108581.CjwKCAjwyryUBhBSEiwAGN5OCOqROE4mMHc_PE601_3VVpvrSHuES3HovE21PvMqbSjNGJz3CffHhBoCABQQAvD_BwE&_gl=1*klg3mq*_ga*MTc3NzAwNzcyNi4xNjUxMjYxNDA3*_ga_9J976DJZ68*MTY1NDEwODUzMS40LjEuMTY1NDEwODU4MS4w
+    dest: '{{dottraceTempDir}}\'
+- name: Unzip dottrace tools
+  win_unzip:
+    src: '{{dottraceTempDir}}\JetBrains.dotTrace.CommandLineTools.windows-x64.2022.1.1.zip'
+    dest: '{{dottraceCmdLineDir}}'
+    creates: '{{dottraceCmdLineDir}}'
+- name: Copy sampling script
+  win_copy:
+    src: dottrace-on-thinkFolio.ps1
+    dest: '{{dottraceSamplingScriptsDir}}\'
+- name: Create snapshots directory
+  win_file:
+    path: '{{dottraceSnapshotsDir}}'
+    state: directory 
+- name: Create dottrace-sampling Scheduled Task
+  win_scheduled_task:
+    name: dottrace-sampling
+    path: \thinkFolio
+    actions:
+    - path: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+      arguments: -Command "& '{{dottraceSamplingScriptsDir}}\dottrace-on-thinkFolio.ps1' '{{dottraceCmdLineDir}}\dottrace.exe' '{{dottraceSnapshotsDir}}' '{{s3BucketForSamples}}' {{sampleDurationSec}}" *> "{{dottraceSnapshotsDir}}\dottrace-script-thinkFolio-$(get-date -f yyyy-MM-ddTHHmmss.fff).log"
+    triggers:
+    - type: registration
+      enabled: yes
+      repetition:
+        interval: PT60M
+    - type: boot
+      delay: PT15M
+      enabled: yes
+      repetition:
+        interval: PT60M
+    start_when_available: yes
+    execution_time_limit: PT3H 
+    username: SYSTEM
+    multiple_instances: 2
+    run_level: highest
+    logon_type: service_account
+    state: present
+    enabled: yes
+
+
