@@ -1,7 +1,7 @@
 
 namespace: "fain_ansible_testing"
 name: "ansible_collection_test"
-version: "1.0.5"
+version: "1.0.6"
 readme: "README.md"
 authors:
     - "Fain Street"
